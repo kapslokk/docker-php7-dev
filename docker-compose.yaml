@@ -31,6 +31,7 @@ php:
     - "./log/php:/var/log/"
   links:
     - mysql
+    - memcached
 
 composer:
   image: composer/composer
@@ -43,6 +44,9 @@ app:
   command: "true"
   volumes:
     - "../test_app/:/var/www/app/"
+
+memcached:
+  image: memcached
 
 phpmyadmin:
   image: phpmyadmin/phpmyadmin
