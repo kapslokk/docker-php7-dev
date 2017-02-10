@@ -1,6 +1,6 @@
 #!/bin/bash
 DOCKER_COMPOSE_DIR="./"
-APP_DIR="../test_app"
+APP_DIR="../app"
 PROJECT="forum"
 OPTIONS="-p $PROJECT -f $DOCKER_COMPOSE_DIR/docker-compose.yaml"
 
@@ -18,7 +18,7 @@ restart() {
 }
 
 composer() {
-    docker run -u 1000 --rm -v -u $UID $(pwd)/$APP_DIR:/app composer/composer  "${@:2}"
+    docker run -u 1000 --rm -v $(pwd)/$APP_DIR:/app composer/composer  "${@:2}"
 }
 
 ps(){

@@ -42,7 +42,7 @@ app:
   image: php:7.0-fpm
   command: "true"
   volumes:
-    - "../test_app/:/var/www/app/"
+    - "../app/:/var/www/app/"
 
 phpmyadmin:
   image: phpmyadmin/phpmyadmin
