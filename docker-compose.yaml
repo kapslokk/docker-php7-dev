@@ -1,56 +1,65 @@
-nginx:
-  build: ./images/nginx
-  ports:
-    - "80:80"
-  volumes_from:
-    - app
-  volumes:
-    - "./config/nginx/conf.d:/etc/nginx/conf.d"
-    - "./log/nginx:/var/log/nginx"
-  links:
-    - php
+version: '2'
+services:
+
+  nginx:
+    build:
+      context: ./images/nginx
+      args:
+        - arg_host_uid=$HOST_UID
+    ports:
+      - "80:80"
+    volumes_from:
+      - app
+    volumes:
+      - "./config/nginx/conf.d:/etc/nginx/conf.d"
+      - "./log/nginx:/var/log/nginx"
+    links:
+      - php
 
 
-mysql:
-  image: mariadb:latest
-  volumes:
-    - "./data/mysql:/var/lib/mysql"
-  environment:
-    MYSQL_ROOT_PASSWORD: secret
-    MYSQL_DATABASE: app
-    MYSQL_USER: app
-    MYSQL_PASSWORD: app
-  ports:
-    - "3306:3306"
+  mysql:
+    image: mariadb:latest
+    volumes:
+      - "./data/mysql:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+    ports:
+      - "3306:3306"
 
-php:
-  build: ./images/php
-  volumes_from:
-    - app
-  volumes:
-    - "./log/php:/var/log/"
-  links:
-    - mysql
+  php:
+    build:
+      context: ./images/php
+      args:
+        - arg_host_uid=$HOST_UID
+    volumes_from:
+      - app
+    volumes:
+      - "./log/php:/var/log/"
+    links:
+      - mysql
 
-composer:
-  image: composer/composer
-  volumes_from:
-    - app
-  command: "true"
+  composer:
+    image: composer/composer
+    volumes:
+      - "$APP_PATH:/app"
+    command: "true"
 
-app:
-  image: php:7.0-fpm
-  command: "true"
-  volumes:
-    - "../app/:/var/www/app/"
+  app:
+    image: php:7.0-fpm
+    command: "true"
+    volumes:
+      - "$APP_PATH:/var/www/app/"
 
-phpmyadmin:
-  image: phpmyadmin/phpmyadmin
-  links:
-    - mysql
-  ports:
-    - "8080:80"
-  environment:
-   - PMA_HOST=mysql
-   - PMA_USER=app
-   - PMA_PASSWORD=app
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - mysql
+    ports:
+      - "8080:80"
+    environment:
+     - PMA_HOST=mysql
+     - PMA_USER=root
+     - PMA_PASSWORD=$MYSQL_ROOT_PASSWORD

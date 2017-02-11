@@ -1,3 +1,3 @@
 FROM nginx:latest
-ENV HOST_UID=1000
-RUN usermod -u $HOST_UID www-data
+ARG arg_host_uid
+RUN usermod -u $arg_host_uid www-data

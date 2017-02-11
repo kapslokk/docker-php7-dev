@@ -1,12 +1,70 @@
 #!/bin/bash
 DOCKER_COMPOSE_DIR="./"
-APP_DIR="../app"
-PROJECT="forum"
-OPTIONS="-p $PROJECT -f $DOCKER_COMPOSE_DIR/docker-compose.yaml"
+OPTIONS="-f $DOCKER_COMPOSE_DIR/docker-compose.yaml"
+
+install () {
+    if [ $UID = 0 ]; then
+        echo "You should not run this script as root!";
+        exit
+    fi
+
+    echo "HOST_UID=$UID" > .env
+
+    echo "Enter project name (default: app)"
+    read project_name
+    if [ -z "$project_name" ]; then
+        echo "COMPOSE_PROJECT_NAME=app" >> .env
+    else
+        echo "COMPOSE_PROJECT_NAME=$project_name" >> .env
+    fi
+
+    echo "Enter path to your php application (default: ../app/)"
+    read path_to_application
+    if [ -z "$path_to_application" ]; then
+        echo "APP_PATH=../app" >> .env
+    else
+        echo "APP_PATH=$path_to_application" >> .env
+    fi
+
+    echo "Enter MySQL connection data."
+    echo "Root password: (default: secret)"
+    read root_password
+    if [ -z "$root_password" ]; then
+        echo "MYSQL_ROOT_PASSWORD=secret" >> .env
+    else
+        echo "MYSQL_ROOT_PASSWORD=$root_password" >> .env
+    fi
+
+    echo "Database name: (default: app)"
+    read db_name
+    if [ -z "$db_name" ]; then
+        echo "MYSQL_DATABASE=app" >> .env
+    else
+        echo "MYSQL_DATABASE=$db_name" >> .env
+    fi
+
+
+    echo "Database user: (default: app)"
+    read db_user
+    if [ -z "$db_user" ]; then
+        echo "MYSQL_USER=app" >> .env
+    else
+        echo "MYSQL_USER=$db_user" >> .env
+    fi
+
+    echo "Database password: (default: app)"
+    read db_passwd
+    if [ -z "$db_passwd" ]; then
+        echo "MYSQL_PASSWORD=app" >> .env
+    else
+        echo "MYSQL_PASSWORD=$db_passwd" >> .env
+    fi
+
+}
 
 up() {
 
-    docker-compose $OPTIONS up -d
+    docker-compose $OPTIONS up -d "${@:2}"
 }
 
 stop() {
@@ -18,7 +76,7 @@ restart() {
 }
 
 composer() {
-    docker run -u 1000 --rm -v $(pwd)/$APP_DIR:/app composer/composer  "${@:2}"
+    docker-compose run -u $UID composer  "${@:2}"
 }
 
 ps(){
@@ -31,15 +89,15 @@ logs(){
 
 
 rebuild(){
-    docker-compose -p "$PROJECT" -f "$DOCKER_COMPOSE_DIR/docker-compose.yaml" build --no-cache
+    docker-compose -f "$DOCKER_COMPOSE_DIR/docker-compose.yaml" build --no-cache
 }
 
 bash() {
-    docker exec -i -t "$PROJECT"_"${@:2}"_1 /bin/bash "${@:3}"
+    docker-compose exec --user $UID ${@:2} /bin/bash "${@:3}"
 }
 
 bash_root() {
-    docker exec -u 1 -i -t "$PROJECT"_"${@:2}"_1 /bin/bash "${@:3}"
+    docker-compose exec --user 0 ${@:2} /bin/bash "${@:3}"
 }
 command_list() {
     echo "Run ./docker.sh with parameters:
@@ -58,7 +116,9 @@ if [[ $1 == ""  ]]; then
     command_list
 else
     case "$1" in
-       "up") up
+        "install") install
+       ;;
+       "up") up "$@"
        ;;
        "stop") stop
        ;;
@@ -74,7 +134,7 @@ else
        ;;
        "bash") bash "$@"
        ;;
-       "bash_root") bash "$@"
+       "bash_root") bash_root "$@"
        ;;
     esac
 fi
