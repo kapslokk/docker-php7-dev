@@ -42,13 +42,13 @@ services:
       - mysql
 
   composer:
-    image: composer/composer
+    image: composer
     volumes:
       - "$APP_PATH:/app"
     command: "true"
 
   app:
-    image: php:7.0-fpm
+    image: php:7.1-fpm
     command: "true"
     volumes:
       - "$APP_PATH:/var/www/app/"

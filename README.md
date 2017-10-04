@@ -1,6 +1,6 @@
 # docker-php7-dev
 ## What's inside? 
-  * PHP 7.0 
+  * PHP 7.1 
   * Nginx
   * MySQL (MariaDB)
   * phpMyAdmin

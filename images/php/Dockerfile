@@ -1,4 +1,4 @@
-FROM php:7.0-fpm
+FROM php:7.1-fpm
 ARG arg_host_uid
 RUN usermod -u $arg_host_uid www-data
 
@@ -16,6 +16,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) mysqli pdo pdo_mysql \
     && docker-php-ext-install -j$(nproc) soap
 
-RUN pecl install redis-3.1.0  && docker-php-ext-enable redis
+RUN pecl install redis-3.1.4  && docker-php-ext-enable redis
 RUN pecl install xdebug-2.5.0 && docker-php-ext-enable xdebug
 
